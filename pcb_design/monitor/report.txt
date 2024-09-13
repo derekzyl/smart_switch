@@ -1,0 +1,28 @@
+Warning: Width correction constrained.  The width correction value must be in the range of [0.000001 mm; 0.199999 mm] for the current design rules.
+Plotted to 'C:\Users\derek\Desktop\embedded\smart_switch\pcb_design\monitor\monitor-F_Cu.gbr'.
+Plotted to 'C:\Users\derek\Desktop\embedded\smart_switch\pcb_design\monitor\monitor-B_Cu.gbr'.
+Plotted to 'C:\Users\derek\Desktop\embedded\smart_switch\pcb_design\monitor\monitor-F_Paste.gbr'.
+Plotted to 'C:\Users\derek\Desktop\embedded\smart_switch\pcb_design\monitor\monitor-B_Paste.gbr'.
+Plotted to 'C:\Users\derek\Desktop\embedded\smart_switch\pcb_design\monitor\monitor-F_Silkscreen.gbr'.
+Plotted to 'C:\Users\derek\Desktop\embedded\smart_switch\pcb_design\monitor\monitor-B_Silkscreen.gbr'.
+Plotted to 'C:\Users\derek\Desktop\embedded\smart_switch\pcb_design\monitor\monitor-F_Mask.gbr'.
+Plotted to 'C:\Users\derek\Desktop\embedded\smart_switch\pcb_design\monitor\monitor-B_Mask.gbr'.
+Plotted to 'C:\Users\derek\Desktop\embedded\smart_switch\pcb_design\monitor\monitor-Edge_Cuts.gbr'.
+Created Gerber job file 'C:\Users\derek\Desktop\embedded\smart_switch\pcb_design\monitor\monitor-job.gbrjob'.
+Plotted to 'C:\Users\derek\Desktop\embedded\smart_switch\pcb_design\monitor\monitor-F_Cu.gbr'.
+Plotted to 'C:\Users\derek\Desktop\embedded\smart_switch\pcb_design\monitor\monitor-B_Cu.gbr'.
+Plotted to 'C:\Users\derek\Desktop\embedded\smart_switch\pcb_design\monitor\monitor-F_Adhesive.gbr'.
+Plotted to 'C:\Users\derek\Desktop\embedded\smart_switch\pcb_design\monitor\monitor-B_Adhesive.gbr'.
+Plotted to 'C:\Users\derek\Desktop\embedded\smart_switch\pcb_design\monitor\monitor-F_Paste.gbr'.
+Plotted to 'C:\Users\derek\Desktop\embedded\smart_switch\pcb_design\monitor\monitor-B_Paste.gbr'.
+Plotted to 'C:\Users\derek\Desktop\embedded\smart_switch\pcb_design\monitor\monitor-F_Silkscreen.gbr'.
+Plotted to 'C:\Users\derek\Desktop\embedded\smart_switch\pcb_design\monitor\monitor-B_Silkscreen.gbr'.
+Plotted to 'C:\Users\derek\Desktop\embedded\smart_switch\pcb_design\monitor\monitor-F_Mask.gbr'.
+Plotted to 'C:\Users\derek\Desktop\embedded\smart_switch\pcb_design\monitor\monitor-B_Mask.gbr'.
+Plotted to 'C:\Users\derek\Desktop\embedded\smart_switch\pcb_design\monitor\monitor-User_Drawings.gbr'.
+Plotted to 'C:\Users\derek\Desktop\embedded\smart_switch\pcb_design\monitor\monitor-User_Comments.gbr'.
+Plotted to 'C:\Users\derek\Desktop\embedded\smart_switch\pcb_design\monitor\monitor-User_Eco1.gbr'.
+Plotted to 'C:\Users\derek\Desktop\embedded\smart_switch\pcb_design\monitor\monitor-User_Eco2.gbr'.
+Created Gerber job file 'C:\Users\derek\Desktop\embedded\smart_switch\pcb_design\monitor\monitor-job.gbrjob'.
+Info: Done.
+Info: Done.
