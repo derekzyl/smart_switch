@@ -22,9 +22,16 @@ int setVoltageAddress = 2;
 int systemTypeAddress = 0;
 int percentageAddress = 1;
 
-float percentage;
-int setVoltage;
-float systemType;
+// Read percentage, setVoltage, and systemType from EEPROM with fallback to 0
+float percentage = EEPROM.read(percentageAddress);
+percentage = (percentage < 0 || percentage > 100) ? 0 : percentage;  // Ensure valid percentage range
+
+int setVoltage = EEPROM.read(setVoltageAddress);
+setVoltage = (setVoltage < 0) ? 0 : setVoltage;  // Fallback to 0 if invalid
+
+float systemType = EEPROM.read(systemTypeAddress);
+systemType = (systemType != 12.0 && systemType != 24.0 && systemType != 48.0) ? 0.0 : systemType;  // Fallback to 0 if invalid
+
 // Create WiFi server
 AsyncWebServer server(80);
 
@@ -41,16 +48,6 @@ void setup() {
   analogReadResolution(12);  // ESP32 ADC is 12-bit
 
   setupWiFiServer();  // Start WiFi server
-    // Read percentage, setVoltage, and systemType from EEPROM
-  percentage = EEPROM.read(percentageAddress);
-  percentage = (percentage < 0 || percentage > 100) ? 0 : percentage;  // Ensure valid percentage range
-
-  setVoltage = EEPROM.read(setVoltageAddress);
-  setVoltage = (setVoltage < 0) ? 0 : setVoltage;  // Fallback to 0 if invalid
-
-  int storedSystemType = EEPROM.read(systemTypeAddress);
-  systemType = (storedSystemType == 12 || storedSystemType == 24 || storedSystemType == 48) ? storedSystemType : 0.0;
-
 }
 
 void loop() {

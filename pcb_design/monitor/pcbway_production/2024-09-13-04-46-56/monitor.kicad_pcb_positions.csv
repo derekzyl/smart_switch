@@ -1,0 +1,7 @@
+﻿pos_x,pos_y,rotation,side,designator,mpn,pack,footprint,value,mount_type,place
+94.0,-84.31,90.0,top,100k,,,R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal,R,tht,True
+149.81,-95.5,180.0,top,10k,,,R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal,R,tht,True
+149.31,-117.5,180.0,top,10k,,,R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal,R,tht,True
+149.81,-106.5,180.0,top,10k,,,R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal,R,tht,True
+94.0,-97.62,90.0,top,5.6k,,,R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal,R,tht,True
+83.0,-98.0,180.0,top,REF1,,,CP_Radial_D8.0mm_P5.00mm,c 100uf,tht,True
