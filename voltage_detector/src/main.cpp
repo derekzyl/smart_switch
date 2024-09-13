@@ -7,7 +7,7 @@
 #include <ArduinoJson.h>
 
 #define R1 100000.0 // resistor R1 value in ohms
-#define R2 10000.0  // resistor R2 value in ohms
+#define R2 5600.0  // resistor R2 value in ohms
 #define ADC_PIN 34  // ADC pin where the voltage divider is connected
 #define MENU_PIN 33
 #define UP_PIN 32
