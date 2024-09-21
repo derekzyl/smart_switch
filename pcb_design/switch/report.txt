@@ -1,0 +1,23 @@
+Plotted to 'C:\Users\derek\Desktop\embedded\smart_switch\pcb_design\switch\switch-F_Cu.gbr'.
+Plotted to 'C:\Users\derek\Desktop\embedded\smart_switch\pcb_design\switch\switch-B_Cu.gbr'.
+Plotted to 'C:\Users\derek\Desktop\embedded\smart_switch\pcb_design\switch\switch-F_Adhesive.gbr'.
+Plotted to 'C:\Users\derek\Desktop\embedded\smart_switch\pcb_design\switch\switch-B_Adhesive.gbr'.
+Plotted to 'C:\Users\derek\Desktop\embedded\smart_switch\pcb_design\switch\switch-F_Paste.gbr'.
+Plotted to 'C:\Users\derek\Desktop\embedded\smart_switch\pcb_design\switch\switch-B_Paste.gbr'.
+Plotted to 'C:\Users\derek\Desktop\embedded\smart_switch\pcb_design\switch\switch-F_Silkscreen.gbr'.
+Plotted to 'C:\Users\derek\Desktop\embedded\smart_switch\pcb_design\switch\switch-B_Silkscreen.gbr'.
+Plotted to 'C:\Users\derek\Desktop\embedded\smart_switch\pcb_design\switch\switch-F_Mask.gbr'.
+Plotted to 'C:\Users\derek\Desktop\embedded\smart_switch\pcb_design\switch\switch-B_Mask.gbr'.
+Plotted to 'C:\Users\derek\Desktop\embedded\smart_switch\pcb_design\switch\switch-User_Drawings.gbr'.
+Plotted to 'C:\Users\derek\Desktop\embedded\smart_switch\pcb_design\switch\switch-User_Comments.gbr'.
+Plotted to 'C:\Users\derek\Desktop\embedded\smart_switch\pcb_design\switch\switch-User_Eco1.gbr'.
+Plotted to 'C:\Users\derek\Desktop\embedded\smart_switch\pcb_design\switch\switch-User_Eco2.gbr'.
+Plotted to 'C:\Users\derek\Desktop\embedded\smart_switch\pcb_design\switch\switch-Edge_Cuts.gbr'.
+Plotted to 'C:\Users\derek\Desktop\embedded\smart_switch\pcb_design\switch\switch-Margin.gbr'.
+Plotted to 'C:\Users\derek\Desktop\embedded\smart_switch\pcb_design\switch\switch-F_Courtyard.gbr'.
+Plotted to 'C:\Users\derek\Desktop\embedded\smart_switch\pcb_design\switch\switch-B_Courtyard.gbr'.
+Plotted to 'C:\Users\derek\Desktop\embedded\smart_switch\pcb_design\switch\switch-F_Fab.gbr'.
+Plotted to 'C:\Users\derek\Desktop\embedded\smart_switch\pcb_design\switch\switch-B_Fab.gbr'.
+Plotted to 'C:\Users\derek\Desktop\embedded\smart_switch\pcb_design\switch\switch-User_1.gbr'.
+Created Gerber job file 'C:\Users\derek\Desktop\embedded\smart_switch\pcb_design\switch\switch-job.gbrjob'.
+Info: Done.

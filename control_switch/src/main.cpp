@@ -35,6 +35,7 @@ void loop() {
 
     int httpCode = http.GET();
     if (httpCode > 0) {
+           digitalWrite(LED_PIN, LOW); // Turn on LED
       String payload = http.getString();
       Serial.println(payload);
 
@@ -62,11 +63,11 @@ void loop() {
 
         // Control relay and LED based on percentage
         if (percentage <= setPercentage) {
-          digitalWrite(RELAY_PIN, LOW);  // Turn off relay
-          digitalWrite(LED_PIN, HIGH);   // Turn on LED
+          digitalWrite(RELAY_PIN, HIGH); // Turn off relay
+        // Turn on LED
         } else {
-          digitalWrite(RELAY_PIN, HIGH); // Turn on relay
-          digitalWrite(LED_PIN, LOW);    // Turn off LED
+          digitalWrite(RELAY_PIN, LOW);  // Turn on relay
+          // Turn off LED
         }
       } else {
         Serial.println("Failed to parse JSON");
@@ -76,8 +77,34 @@ void loop() {
     }
     http.end();
   } else {
+       digitalWrite(LED_PIN, HIGH); // Turn on LED
     Serial.println("Disconnected from WiFi");
   }
 
   delay(60000);  // Delay before next check (e.g., 1 minute)
+}
+
+
+
+#include <ESP8266WiFi.h>
+#include <ESP8266WebServer.h>
+
+ESP8266WebServer server(80);  // Web server running on port 80
+
+void setup() {
+  Serial.begin(115200);
+  WiFi.softAP("ESP01_Hotspot", "12345678");
+
+  // Start the server
+  server.on("/", handleRoot);  // When accessing the root page
+  server.begin();
+  Serial.println("Web server started.");
+}
+
+void handleRoot() {
+  server.send(200, "text/html", "<h1>Hello from ESP01!</h1>");
+}
+
+void loop() {
+  server.handleClient();  // Handle web requests
 }

@@ -1,4 +1,3 @@
-
 #include <Arduino.h>
 #include <WiFi.h>
 #include <EEPROM.h>
@@ -6,51 +5,59 @@
 #include <ESPAsyncWebServer.h>
 #include <ArduinoJson.h>
 
-#define R1 100000.0 // resistor R1 value in ohms
-#define R2 5600.0  // resistor R2 value in ohms
+#define R1 100000.0 // Resistor R1 value in ohms
+#define R2 5600.0   // Resistor R2 value in ohms
 #define ADC_PIN 34  // ADC pin where the voltage divider is connected
-#define MENU_PIN 33
-#define UP_PIN 32
-#define DOWN_PIN 35
+#define MENU_PIN 5
+#define UP_PIN 19
+#define DOWN_PIN 18
 
 #define MAX_DEVICES 10
 #define DEVICE_BLOCK_SIZE 20  // 16 bytes for device ID, 4 bytes for voltage
 #define DEVICE_ID_SIZE 16
 #define VOLTAGE_SIZE 4
 
-int setVoltageAddress = 2;
+int setPercentageOffAddress = 2;
 int systemTypeAddress = 0;
 int percentageAddress = 1;
+bool inVoltageSettingMode = false;  // Flag to track if we're in the setting mode
 
 float percentage;
-int setVoltage;
+int setPercentageForOff;
 float systemType;
+
 // Create WiFi server
 AsyncWebServer server(80);
-
 LiquidCrystal_I2C lcd(0x27, 16, 2);  // Set the LCD address to 0x27 for a 16x2 display
 
 void setup() {
   Serial.begin(115200);
   lcd.init();
   lcd.backlight();
+    // Pin configuration for buttons
+  pinMode(MENU_PIN, INPUT_PULLUP);
+  pinMode(UP_PIN, INPUT_PULLUP);
+  pinMode(DOWN_PIN, INPUT_PULLUP);
+
+  // Setup WiFi AP
   WiFi.softAP("ESP32_Battery_Monitor");
   WiFi.softAPConfig(IPAddress(192, 168, 1, 1), IPAddress(192, 168, 1, 1), IPAddress(255, 255, 255, 0));
+
   EEPROM.begin(512);
 
   analogReadResolution(12);  // ESP32 ADC is 12-bit
 
   setupWiFiServer();  // Start WiFi server
-    // Read percentage, setVoltage, and systemType from EEPROM
+
+  // Read percentage, setPercentageForOff, and systemType from EEPROM
   percentage = EEPROM.read(percentageAddress);
   percentage = (percentage < 0 || percentage > 100) ? 0 : percentage;  // Ensure valid percentage range
 
-  setVoltage = EEPROM.read(setVoltageAddress);
-  setVoltage = (setVoltage < 0) ? 0 : setVoltage;  // Fallback to 0 if invalid
+  setPercentageForOff = EEPROM.read(setPercentageOffAddress);
+  setPercentageForOff = (setPercentageForOff < 0) ? 0 : setPercentageForOff;  // Fallback to 0 if invalid
 
   int storedSystemType = EEPROM.read(systemTypeAddress);
   systemType = (storedSystemType == 12 || storedSystemType == 24 || storedSystemType == 48) ? storedSystemType : 0.0;
-
 }
 
 void loop() {
@@ -61,15 +68,21 @@ void loop() {
   // Display the voltage and battery percentage on the LCD
   displayOnLCD(voltage, batteryPercentage);
 
-  // Handle button presses to adjust setVoltage
-  buttonToSetVoltage();
+  // Handle button presses to adjust setPercentageForOff
+  buttonToSetPercentageOff();
+  delay(1000);
 }
 
 float getVoltage() {
-  int adcValue = analogRead(ADC_PIN);
+  float adcValue = analogRead(ADC_PIN);
+  
+  // Convert ADC value to actual voltage considering voltage divider ratio
   float voltage = adcValue * (3.3 / 4095.0);  // Convert ADC value to voltage
-  return voltage;
+  float actualVoltage = (voltage / (R2 / (R1 + R2))) +3;  // Adjust for voltage divider
+
+  return actualVoltage;
 }
+
 
 float detectBatteryType(float voltage) {
   if (voltage <= 14.4) {
@@ -93,29 +106,97 @@ float detectBatteryType(float voltage) {
 }
 
 float calculateBatteryPercentage(float voltage, float systemType) {
-  float minVoltage = systemType * 0.7;
-  float maxVoltage = systemType * 0.9;
-  percentage = (voltage - minVoltage) / (maxVoltage - minVoltage) * 100;
-  EEPROM.write(percentageAddress, (int)percentage);
+  float minVoltage = systemType * 1;
+  float maxVoltage = systemType * 1.2;
+  // percentage = (voltage - minVoltage) / (maxVoltage - minVoltage) * 100;
+  float c = (voltage - minVoltage) / (maxVoltage - minVoltage) * 100;
+  if (voltage < minVoltage) {
+    c = 0;
+  } else if (voltage > maxVoltage) {
+    c = 100;
+  }
+  // float c= map(voltage, minVoltage, maxVoltage, 0, 100);
+  percentage = c;
+  EEPROM.write(percentageAddress, (int)c);
   EEPROM.commit();
-  return constrain(percentage, 0, 100);
+  return constrain(c, 0, 100);
 }
 
 void displayOnLCD(float voltage, float percentage) {
+  if(inVoltageSettingMode== false){
   lcd.clear();
   lcd.setCursor(0, 0);
-  lcd.print("Voltage: ");
+  lcd.print("Volt: ");
   lcd.print(voltage);
   lcd.print("V");
+  lcd.setCursor(9, 0);
+  lcd.print("Sys:");
+  lcd.print(systemType);
+  lcd.print("V");
   lcd.setCursor(0, 1);
-  lcd.print("Charge: ");
+  lcd.print("Bat:");
   lcd.print(percentage);
+
   lcd.print("%");
+  lcd.setCursor(9, 1);
+  lcd.print("Off:");
+  lcd.print(setPercentageForOff);
+  lcd.print("%");
+  delay(1000);
+  }
 }
+// void displayOnLCD(float voltage, float percentage) {
+//   static int displayIndex = 0;  // Static variable to remember the current display state
+//   static unsigned long previousMillis = 0;
+//   unsigned long currentMillis = millis();
+//   unsigned long interval = 5000;  // 5 seconds per display cycle
+
+//   if (inVoltageSettingMode == false) {
+//     if (currentMillis - previousMillis >= interval) {
+//       previousMillis = currentMillis;
+//       lcd.clear();  // Clear the screen for the new display
+
+//       // Cycle through the display options
+//       switch (displayIndex) {
+//         case 0:
+//           // Display "Voltage" and its value
+//           lcd.setCursor(0, 0);
+//           lcd.print("Voltage:");
+//           lcd.setCursor(0, 1);
+//           lcd.print(voltage);
+//           lcd.print("V");
+//           break;
+//         case 1:
+//           // Display "Battery %" and its value
+//           lcd.setCursor(0, 0);
+//           lcd.print("Battery %:");
+//           lcd.setCursor(0, 1);
+//           lcd.print(percentage);
+//           lcd.print("%");
+//           break;
+//         case 2:
+//           // Display "Off %" and its value
+//           lcd.setCursor(0, 0);
+//           lcd.print("turn of %:");
+//           lcd.setCursor(0, 1);
+//           lcd.print(setPercentageForOff);
+//           lcd.print("%");
+//           break;
+//       }
+
+//       // Move to the next display item
+//       displayIndex++;
+//       if (displayIndex > 2) {
+//         displayIndex = 0;  // Reset after the last display option
+//       }
+//     }
+//   }
+// }
+
 
 void setupWiFiServer() {
   // Route to set multiple voltages for devices based on JSON input
-  server.on("/setVoltages", HTTP_POST, [](AsyncWebServerRequest *request) {}, NULL, [](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
+  server.on("/setPercentageOffs", HTTP_POST, [](AsyncWebServerRequest *request) {}, NULL, [](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
     // Create a JSON document object to store incoming data
     StaticJsonDocument<512> jsonDoc;
 
@@ -132,7 +213,7 @@ void setupWiFiServer() {
       int voltage = kv.value().as<int>();
 
       // Store voltage for that device dynamically
-      storeVoltage(deviceId, voltage);
+      storePercentageByDeviceId(deviceId, voltage);
     }
 
     // Create a JSON response
@@ -147,11 +228,11 @@ void setupWiFiServer() {
   server.on("/getVoltageById", HTTP_GET, [](AsyncWebServerRequest *request) {
     if (request->hasParam("deviceId")) {
       String deviceId = request->getParam("deviceId")->value();
-      int voltage = retrieveVoltage(deviceId);
+      int voltage = retrievePercentageByDeviceId(deviceId);
 
       if (voltage == -1) {
         // If deviceId is not found, use the globally set voltage from EEPROM
-        voltage = setVoltage;
+        voltage = setPercentageForOff;
       }
 
       // Send response in JSON format
@@ -173,32 +254,54 @@ void setupWiFiServer() {
   server.begin();
 }
 
-void buttonToSetVoltage() {
-  // Check if the menu button is pressed to enter voltage setting mode
-  if (digitalRead(MENU_PIN) == HIGH) {
+void buttonToSetPercentageOff() {
+  // Check if the menu button is pressed to toggle between modes
+  if (digitalRead(MENU_PIN) == LOW) {  // Button press is LOW due to pull-up
+    delay(200);  // Debounce delay to prevent multiple toggles
+    inVoltageSettingMode = !inVoltageSettingMode;  // Toggle mode
+    lcd.clear();
+    
+    if (inVoltageSettingMode) {
+      lcd.setCursor(0, 0);
+      lcd.print("Set Mode Active");
+      lcd.setCursor(0, 1);
+      lcd.print("Set Percentage: ");
+    } else {
+      lcd.setCursor(0, 0);
+      lcd.print("Exiting Mode");
+    }
+
+    delay(500);  // Additional delay to avoid immediate toggling
+  }
+
+  // Only adjust voltage if in the setting mode
+  if (inVoltageSettingMode) {
     // Display the set voltage on the LCD
     lcd.clear();
     lcd.setCursor(0, 0);
-    lcd.print("Set Voltage: ");
-    lcd.print(setVoltage);
+    lcd.print("Set Percentage: ");
+    lcd.setCursor(0, 1);
+    lcd.print(setPercentageForOff);
     lcd.print("%");
 
     // Check if the up button is pressed to increase voltage
-    if (digitalRead(UP_PIN) == HIGH) {
-      if (setVoltage < 100) {
-        setVoltage++;
+    if (digitalRead(UP_PIN) == LOW) {  // Button press is LOW due to pull-up
+      if (setPercentageForOff < 100) {
+        setPercentageForOff++;
         delay(200);  // Add a short delay to prevent rapid incrementing
       }
     }
 
     // Check if the down button is pressed to decrease voltage
-    if (digitalRead(DOWN_PIN) == HIGH) {
-      if (setVoltage > 0) {
-        setVoltage--;
+    if (digitalRead(DOWN_PIN) == LOW) {  // Button press is LOW due to pull-up
+      if (setPercentageForOff > 0) {
+        setPercentageForOff--;
         delay(200);  // Add a short delay to prevent rapid decrementing
       }
     }
-    EEPROM.write(setVoltageAddress, setVoltage);
+
+    // Save the new set voltage to EEPROM
+    EEPROM.write(setPercentageOffAddress, setPercentageForOff);
     EEPROM.commit();
   }
 }
@@ -218,69 +321,70 @@ int findDeviceBlock(String deviceId) {
   return -1;  // Device not found
 }
 
-// Function to assign a new block if the device ID is not already stored
-int assignNewDeviceBlock(String deviceId) {
-  for (int i = 0; i < MAX_DEVICES; i++) {
-    int address = i * DEVICE_BLOCK_SIZE;
+void storePercentageByDeviceId(String deviceId, int voltage) {
+  int deviceBlockAddress = findDeviceBlock(deviceId);
 
-    // Check if the block is empty (no device stored)
-    String storedDeviceId = readDeviceIdFromEEPROM(address);
+  if (deviceBlockAddress == -1) {
+    // Device ID not found, find the first empty block
+    for (int i = 0; i < MAX_DEVICES; i++) {
+      int address = i * DEVICE_BLOCK_SIZE;
 
-    if (storedDeviceId.length() == 0) {
-      // Empty block found, store the new device ID
-      writeDeviceIdToEEPROM(address, deviceId);
-      return address;
+      // Read device ID from EEPROM
+      String storedDeviceId = readDeviceIdFromEEPROM(address);
+
+      // If the block is empty, use this block to store the device ID and voltage
+      if (storedDeviceId == "") {
+        writeDeviceIdToEEPROM(address, deviceId);
+        writePercentageToEEPROM(address + DEVICE_ID_SIZE, voltage);
+        break;
+      }
     }
+  } else {
+    // Device ID found, update its voltage
+    writePercentageToEEPROM(deviceBlockAddress + DEVICE_ID_SIZE, voltage);
   }
-  return -1;  // No available block
+
+  EEPROM.commit();  // Save changes to EEPROM
 }
 
-// Function to read the device ID from EEPROM
+int retrievePercentageByDeviceId(String deviceId) {
+  int deviceBlockAddress = findDeviceBlock(deviceId);
+
+  if (deviceBlockAddress != -1) {
+    return readPercentageFromEEPROM(deviceBlockAddress + DEVICE_ID_SIZE);
+  }
+
+  return -1;  // Device ID not found
+}
+
 String readDeviceIdFromEEPROM(int address) {
-  char deviceId[DEVICE_ID_SIZE];
+  String deviceId = "";
   for (int i = 0; i < DEVICE_ID_SIZE; i++) {
-    deviceId[i] = EEPROM.read(address + i);
+    char c = EEPROM.read(address + i);
+    if (c == 0) {
+      break;  // Stop if null character is encountered
+    }
+    deviceId += c;
   }
-  return String(deviceId);
+  return deviceId;
 }
 
-// Function to write the device ID to EEPROM
 void writeDeviceIdToEEPROM(int address, String deviceId) {
   for (int i = 0; i < DEVICE_ID_SIZE; i++) {
-    EEPROM.write(address + i, deviceId[i]);
-  }
-  EEPROM.commit();
-}
-
-// Function to store the voltage for a given device
-void storeVoltage(String deviceId, int voltage) {
-  int deviceAddress = findDeviceBlock(deviceId);
-
-  if (deviceAddress == -1) {
-    // Device not found, assign a new block
-    deviceAddress = assignNewDeviceBlock(deviceId);
-
-    if (deviceAddress == -1) {
-      Serial.println("Error: No available space for new device.");
-      return;
+    if (i < deviceId.length()) {
+      EEPROM.write(address + i, deviceId[i]);
+    } else {
+      EEPROM.write(address + i, 0);  // Write null character for unused bytes
     }
   }
-
-  // Store voltage in the block
-  EEPROM.put(deviceAddress + DEVICE_ID_SIZE, voltage);  // Store voltage after device ID
-  EEPROM.commit();
-  Serial.println("Stored voltage " + String(voltage) + " for device " + deviceId);
 }
 
-// Function to retrieve the voltage for a given device
-int retrieveVoltage(String deviceId) {
-  int deviceAddress = findDeviceBlock(deviceId);
+int readPercentageFromEEPROM(int address) {
+  int voltage = 0;
+  EEPROM.get(address, voltage);
+  return voltage;
+}
 
-  if (deviceAddress != -1) {
-    int voltage;
-    EEPROM.get(deviceAddress + DEVICE_ID_SIZE, voltage);  // Get voltage after device ID
-    return voltage;
-  }
-
-  return -1;  // Device not found
+void writePercentageToEEPROM(int address, int voltage) {
+  EEPROM.put(address, voltage);
 }
