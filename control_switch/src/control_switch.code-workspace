@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": ".."
+		},
+		{
+			"name": "smart_switch__temp_monitor__water_level_monitor",
+			"path": "../../../../../Documents/PlatformIO/Projects/smart_switch__temp_monitor__water_level_monitor"
+		},
+		{
+			"name": "projects",
+			"path": "../../../projects"
+		}
+	],
+	"settings": {}
+}
