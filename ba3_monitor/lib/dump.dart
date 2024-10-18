@@ -1,89 +1,9 @@
-// import 'package:flutter/material.dart';
-// import 'package:http/http.dart' as http;
-// import 'dart:convert';
 
-// void main() {
-//   runApp(BatteryMonitorApp());
-// }
-
-// class BatteryMonitorApp extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaterialApp(
-//       title: 'Battery Monitor',
-//       theme: ThemeData(
-//         primarySwatch: Colors.blue,
-//       ),
-//       home: BatteryMonitorScreen(),
-//     );
-//   }
-// }
-
-// class BatteryMonitorScreen extends StatefulWidget {
-//   @override
-//   _BatteryMonitorScreenState createState() => _BatteryMonitorScreenState();
-// }
-
-// class _BatteryMonitorScreenState extends State<BatteryMonitorScreen> {
-//   int batteryPercentage = 0;
-
-//   @override
-//   void initState() {
-//     super.initState();
-//     _fetchBatteryData();
-//   }
-
-//   Future<void> _fetchBatteryData() async {
-//     try {
-//       // Replace with the ESP32's IP address and endpoint
-//       final response = await http.get(Uri.parse('http://192.168.4.1/battery'));
-//       if (response.statusCode == 200) {
-//         setState(() {
-//           batteryPercentage = int.parse(response.body.trim());
-//         });
-//       } else {
-//         throw Exception('Failed to load battery data');
-//       }
-//     } catch (e) {
-//       print("Error fetching battery data: $e");
-//     }
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: Text('Battery Monitor'),
-//       ),
-//       body: Center(
-//         child: Column(
-//           mainAxisAlignment: MainAxisAlignment.center,
-//           children: <Widget>[
-//             Text(
-//               'Battery Percentage:',
-//               style: TextStyle(fontSize: 24),
-//             ),
-//             SizedBox(height: 20),
-//             Text(
-//               '$batteryPercentage%',
-//               style: TextStyle(fontSize: 48, fontWeight: FontWeight.bold),
-//             ),
-//             SizedBox(height: 40),
-//             ElevatedButton(
-//               onPressed: _fetchBatteryData,
-//               child: Text('Refresh'),
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// }
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_neumorphic/flutter_neumorphic.dart';
+import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 
 void main() {
   runApp(MyApp());
@@ -236,18 +156,19 @@ class _HomePageState extends State<HomePage> {
               child: Column(
                 children: [
                   NeumorphicTextField(
-                    decoration: InputDecoration(labelText: 'Device ID'),
+                    hint: 'Device ID',
+                    onSaved: (value) => _newDeviceId = value!,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter a device ID';
                       }
                       return null;
                     },
-                    onSaved: (value) => _newDeviceId = value!,
                   ),
                   SizedBox(height: 16),
                   NeumorphicTextField(
-                    decoration: InputDecoration(labelText: 'Percentage'),
+                    hint: 'Percentage',
+                    onSaved: (value) => _newDevicePercentage = int.parse(value!),
                     keyboardType: TextInputType.number,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -258,7 +179,6 @@ class _HomePageState extends State<HomePage> {
                       }
                       return null;
                     },
-                    onSaved: (value) => _newDevicePercentage = int.parse(value!),
                   ),
                   SizedBox(height: 16),
                   NeumorphicButton(
@@ -273,7 +193,7 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             SizedBox(height: 20),
-            Text('Devices:', style: TextStyle(fontSize: 20)),
+            Text('Devices:', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
             Expanded(
               child: ListView.builder(
                 itemCount: _devices.length,
@@ -319,14 +239,14 @@ class _HomePageState extends State<HomePage> {
 }
 
 class NeumorphicTextField extends StatelessWidget {
-  final InputDecoration decoration;
+  final String hint;
   final FormFieldValidator<String>? validator;
   final dynamic onSaved;
   final TextInputType? keyboardType;
 
   const NeumorphicTextField({
     Key? key,
-    required this.decoration,
+    required this.hint,
     this.validator,
     this.onSaved,
     this.keyboardType,
@@ -342,7 +262,8 @@ class NeumorphicTextField extends StatelessWidget {
         boxShape: NeumorphicBoxShape.roundRect(BorderRadius.circular(12)),
       ),
       child: TextFormField(
-        decoration: decoration.copyWith(
+        decoration: InputDecoration(
+          hintText: hint,
           border: InputBorder.none,
           contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         ),
