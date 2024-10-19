@@ -299,7 +299,7 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       backgroundColor: NeumorphicTheme.baseColor(context),
       appBar: NeumorphicAppBar(
-        title: Text('ESP32 Battery Monitor'),
+        title: Text('Battery Monitor', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold) ),
       ),
       body: Padding(
         padding: EdgeInsets.all(16.0),
@@ -435,7 +435,7 @@ class _HomePageState extends State<HomePage> {
         
             NeumorphicButton(
               onPressed: _sendDataToESP32,
-              child: Text('Send Data to ESP32'),
+              child: Text('Send Data to main'),
               style: NeumorphicStyle(
                 shape: NeumorphicShape.flat,
                 boxShape: NeumorphicBoxShape.roundRect(BorderRadius.circular(12)),
