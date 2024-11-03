@@ -166,6 +166,8 @@ void displayOnLCD(float voltage, float percentage) {
   delay(1000);
   }
 }
+
+
 // void displayOnLCD(float voltage, float percentage) {
 //   static int displayIndex = 0;  // Static variable to remember the current display state
 //   static unsigned long previousMillis = 0;
@@ -271,8 +273,31 @@ void setupWiFiServer() {
       request->send(400, "application/json", "{\"error\":\"Missing deviceId parameter\"}");
     }
   });
+server.on("/deleteDevice", HTTP_POST, [](AsyncWebServerRequest *request) {}, NULL, [](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
+    StaticJsonDocument<256> jsonDoc;
+    DeserializationError error = deserializeJson(jsonDoc, (const char*)data);
+    
+    if (error) {
+      request->send(400, "application/json", "{\"error\":\"Invalid JSON format\"}");
+      return;
+    }
+
+    String deviceId = jsonDoc["deviceId"].as<String>();
+    bool deleted = deleteDeviceFromEEPROM(deviceId);
+
+    if (deleted) {
+      request->send(200, "application/json", "{\"status\":\"success\",\"message\":\"Device deleted\"}");
+    } else {
+      request->send(404, "application/json", "{\"error\":\"Device not found\"}");
+    }
+  });
 
   server.begin();
+
+
+
+
+
 }
 
 void buttonToSetPercentageOff() {
@@ -408,4 +433,24 @@ int readPercentageFromEEPROM(int address) {
 
 void writePercentageToEEPROM(int address, int voltage) {
   EEPROM.put(address, voltage);
+}
+
+
+
+
+
+
+bool deleteDeviceFromEEPROM(String deviceId) {
+  int deviceBlockAddress = findDeviceBlock(deviceId);
+
+  if (deviceBlockAddress != -1) {
+    // Clear the device block in EEPROM
+    for (int i = 0; i < DEVICE_BLOCK_SIZE; i++) {
+      EEPROM.write(deviceBlockAddress + i, 0);
+    }
+    EEPROM.commit();
+    return true;
+  }
+
+  return false;
 }

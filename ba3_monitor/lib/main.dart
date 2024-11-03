@@ -115,6 +115,22 @@ class _HomePageState extends State<HomePage> {
   void _addDevice() {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
+
+      // check if the device ID already exists
+
+      if (_devices.any((device) => device.id == _newDeviceId )) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Device ID already exists')),
+        );
+        return;
+      }
+      if(_devices.any((device) => device.name == _newDeviceName)){
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Device Name already exists')),
+        );
+        return;
+      }
+
       setState(() {
         _devices.add(Device(
           id: _newDeviceId,
@@ -294,6 +310,9 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+
+
+bool _customExpansionTileIsExpanded = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -302,85 +321,138 @@ class _HomePageState extends State<HomePage> {
         title: Text('Battery Monitor', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold) ),
       ),
       body: Padding(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Form(
-              key: _formKey,
-              child: Column(
-                children: [
-                  NeumorphicTextField(
-                    hint: 'Device ID',
-                    onSaved: (value) => _newDeviceId = value!,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter a device ID';
-                      }
-                      return null;
-                    },
+
+          
+            Neumorphic(
+              style: NeumorphicStyle(
+                shape: NeumorphicShape.flat,depth: 3, intensity: 0.65, surfaceIntensity: 0.15, boxShape: NeumorphicBoxShape.roundRect(BorderRadius.circular(12),) 
+              ),
+              child: ExpansionTile(
+                title: Text("Add New device",style:TextStyle(fontWeight: FontWeight.w600)),
+                
+                          onExpansionChanged: (bool expanded) {
+              setState(() {
+                _customExpansionTileIsExpanded = expanded;
+              });
+                        },
+                 trailing:NeumorphicButton(
+                  
+                  style: NeumorphicStyle(
+                  shape: NeumorphicShape.concave,
+                  intensity: 0.9,
+                    depth: 2,
+                    boxShape: NeumorphicBoxShape.roundRect(BorderRadius.circular(16)),
                   ),
-                  SizedBox(height: 16),
-                  NeumorphicTextField(
-                    hint: 'Device Name',
-                    onSaved: (value) => _newDeviceName = value!,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter a device name';
-                      }
-                      return null;
-                    },
-                  ),
-                  SizedBox(height: 16),
-                  NeumorphicTextField(
-                    hint: 'Percentage',
-                    onSaved: (value) => _newDevicePercentage = int.parse(value!),
-                    keyboardType: TextInputType.number,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter a percentage';
-                      }
-                      if (int.tryParse(value) == null) {
-                        return 'Please enter a valid number';
-                      }
-                      return null;
-                    },
-                  ),
-                  SizedBox(height: 16),
-                  NeumorphicDropdown<String>(
-                    value: _selectedApplianceType,
-                    items: _applianceTypes.map((type) {
-                      return DropdownMenuItem(
-                        value: type.name,
-                        child: Row(
-                          children: [
-                            Icon(type.icon),
-                            SizedBox(width: 10),
-                            Text(type.name),
-                          ],
-                        ),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedApplianceType = value!;
-                      });
-                    },
-                  ),
-                  SizedBox(height: 16),
-                  NeumorphicButton(
-                    onPressed: _addDevice,
-                    child: Text('Add Device'),
-                    style: NeumorphicStyle(
-                      shape: NeumorphicShape.flat,
-                      boxShape: NeumorphicBoxShape.roundRect(BorderRadius.circular(12)),
+                  
+                  child: _customExpansionTileIsExpanded ? NeumorphicIcon(Icons.arrow_upward,style: NeumorphicStyle(
+                    color: HSLColor.fromAHSL(1, 180, 0.2, 0.5).toColor(),
+
+                  ),): NeumorphicIcon(Icons.add, 
+                 style:NeumorphicStyle(
+                    color: HSLColor.fromAHSL(1, 180, 0.2, 0.5).toColor(),
+         
+
+                 )   ,) ),
+                children:[
+                
+                 Form(
+                  key: _formKey,
+                  child: Neumorphic(
+                    style:NeumorphicStyle(
+                shape: NeumorphicShape.flat,depth: 1, intensity: 0.65, surfaceIntensity: 0.15, boxShape: NeumorphicBoxShape.roundRect(BorderRadius.circular(12),)
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Column(
+                        
+                        children: [
+                          NeumorphicTextField(
+                            hint: 'Device ID',
+                            onSaved: (value) => _newDeviceId = value!,
+                            
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter a device ID';
+                              }
+                              return null;
+                            },
+                          ),
+                          SizedBox(height: 16),
+                          NeumorphicTextField(
+                            hint: 'Device Name',
+                            onSaved: (value) => _newDeviceName = value!,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter a device name';
+                              }
+                              return null;
+                            },
+                          ),
+                          SizedBox(height: 16),
+                          NeumorphicTextField(
+                            hint: 'Percentage',
+                            onSaved: (value) => _newDevicePercentage = int.parse(value!),
+                            keyboardType: TextInputType.number,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter a percentage';
+                              }
+                              if (int.tryParse(value) == null) {
+                                return 'Please enter a valid number';
+                              }
+                              return null;
+                            },
+                          ),
+                          SizedBox(height: 16),
+                          NeumorphicDropdown<String>(
+                            value: _selectedApplianceType,
+                            items: _applianceTypes.map((type) {
+                              return DropdownMenuItem(
+                                value: type.name,
+                                child: Row(
+                                  children: [
+                                    Icon(type.icon),
+                                    SizedBox(width: 10),
+                                    Text(type.name),
+                                  ],
+                                ),
+                              );
+                            }).toList(),
+                            onChanged: (value) {
+                              setState(() {
+                                _selectedApplianceType = value!;
+                              });
+                            },
+                          ),
+                          SizedBox(height: 16),
+                          NeumorphicButton(
+                            onPressed: _addDevice,
+                            child: Text('Add Device'),
+                            style: NeumorphicStyle(
+                              shape: NeumorphicShape.flat,
+                              depth: 2,
+                              boxShape: NeumorphicBoxShape.roundRect(BorderRadius.circular(12)),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ],
-              ),
+                ),
+                         
+                         
+                         
+                         ] ),
             ),
             SizedBox(height: 20),
-            Text('Devices:', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              
+              
+            Text('Devices', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.grey[700])),
+         _devices.length>=1?
             Expanded(
               child: ListView.builder(
                 itemCount: _devices.length,
@@ -389,55 +461,102 @@ class _HomePageState extends State<HomePage> {
                   return Neumorphic(
                     margin: EdgeInsets.only(bottom: 12),
                     style: NeumorphicStyle(
-                      depth: 8,
+                      depth: 2,
                       intensity: 0.65,
                       surfaceIntensity: 0.15,
                       boxShape: NeumorphicBoxShape.roundRect(BorderRadius.circular(12)),
                     ),
-                    child: ListTile(
-                      leading: Icon(_applianceTypes.firstWhere((type) => type.name == device.applianceType).icon),
-                      title: Text(device.name),
-                      subtitle: Text('ID: ${device.id}\nSet: ${device.percentage}% | Battery: ${device.batteryPercentage?.toStringAsFixed(1) ?? "N/A"}% | System: ${device.systemType ?? "N/A"}V'),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          NeumorphicButton(
-                            onPressed: () => _updateDevice(device),
-                            child: Icon(Icons.edit),
-                            style: NeumorphicStyle(
-                              boxShape: NeumorphicBoxShape.circle(),
-                            ),
+                    child: Column(
+              
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Row(
+                            children: [
+                                         Icon(
+                                          _applianceTypes.firstWhere((type) => type.name == device.applianceType).icon),
+                           Text(device.name, style:TextStyle(
+                              fontWeight: FontWeight.bold, color: Colors.grey[900],  fontSize: 16
+                           )),  ],
                           ),
-                          SizedBox(width: 8),
-                          NeumorphicButton(
-                            onPressed: () => _deleteDevice(device),
-                            child: Icon(Icons.delete),
-                            style: NeumorphicStyle(
-                              boxShape: NeumorphicBoxShape.circle(),
+                        ),Text('ID: ${device.id}\nSet: ${device.percentage}% | Battery: ${device.batteryPercentage?.toStringAsFixed(1) ?? "N/A"}% | System: ${device.systemType ?? "N/A"}V', style:TextStyle(
+                          fontWeight:FontWeight.w600, color: Colors.grey[700],
+                        )),
+                         Padding(
+                           padding: const EdgeInsets.all(8.0),
+                           child: Row(
+                                                   mainAxisSize: MainAxisSize.min,
+                                                   children: [
+                            NeumorphicButton(
+                              onPressed: () => _updateDevice(device),
+                              child: NeumorphicIcon(Icons.edit,  style: NeumorphicStyle(
+                                                   
+                              color: HSLColor.fromAHSL(1, 270,0.2, 0.5).toColor(),
+                              ),),
+                              style: NeumorphicStyle(
+                                boxShape: NeumorphicBoxShape.circle(),
+                              ),
                             ),
-                          ),
-                          SizedBox(width: 8),
-                          NeumorphicButton(
-                            onPressed: () => _getDataFromESP32(device),
-                            child: Icon(Icons.refresh),
-                            style: NeumorphicStyle(
-                              boxShape: NeumorphicBoxShape.circle(),
+                            SizedBox(width: 8),
+                            NeumorphicButton(
+                              onPressed: () => _deleteDevice(device),
+                              child: NeumorphicIcon(Icons.delete, 
+                              style: NeumorphicStyle(
+                                                   
+                              color: HSLColor.fromAHSL(1, 1, 0.2, 0.5).toColor(),
+                              ),
+                              ),
+                              style: NeumorphicStyle(
+                                boxShape: NeumorphicBoxShape.circle(),
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
+                            SizedBox(width: 8),
+                            NeumorphicButton(
+                              onPressed: () => _getDataFromESP32(device),
+                              child: NeumorphicIcon(Icons.refresh,  style: NeumorphicStyle(
+                           
+                              color:HSLColor.fromAHSL(1, 180, 0.2, 0.5).toColor(),
+                              ),),
+                              style: NeumorphicStyle(
+                                boxShape: NeumorphicBoxShape.circle(),
+                              ),
+                            ),
+                                                   ],
+                                                 ),
+                         ),
+                    
+                    
+                    
+                      ],
+                      
+              
+                    
                     ),
                   );
                 },
               ),
-            ),
+            )
+            :Expanded(child: Center(child: Text('No devices added yet', style: TextStyle(color: Colors.grey[700])))),  
+            
             SizedBox(height: 16),
         
             NeumorphicButton(
+
               onPressed: _sendDataToESP32,
-              child: Text('Send Data to main'),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+
+                children: [
+                  Text('Sync Data', style: TextStyle(
+                    fontWeight: FontWeight.bold
+                  ),),SizedBox(width: 2,),  NeumorphicIcon(Icons.sync, style: NeumorphicStyle(
+                    color: HSLColor.fromAHSL(1, 180, 0.2, 0.5).toColor(),
+                  ),)
+                ],
+              ),
               style: NeumorphicStyle(
                 shape: NeumorphicShape.flat,
+                depth: 2,
                 boxShape: NeumorphicBoxShape.roundRect(BorderRadius.circular(12)),
               ),
             ),
@@ -466,9 +585,9 @@ class NeumorphicTextField extends StatelessWidget {
   Widget build(BuildContext context) {
     return Neumorphic(
       style: NeumorphicStyle(
-        depth: -4,
-        intensity: 0.8,
-        surfaceIntensity: 0.2,
+        depth: -2,
+        intensity: 0.9,
+        surfaceIntensity: 0.0,
         boxShape: NeumorphicBoxShape.roundRect(BorderRadius.circular(12)),
       ),
       child: TextFormField(
