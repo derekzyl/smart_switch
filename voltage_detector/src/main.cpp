@@ -265,6 +265,45 @@ server.on("/getVoltageById", HTTP_GET, [](AsyncWebServerRequest *request) {
     }
 });
 
+
+
+server.on("/getvoltage", HTTP_GET, [](AsyncWebServerRequest *request) {
+    // Create a JSON document to store the response data
+    StaticJsonDocument<256> responseDoc;
+
+    // Add the voltage and percentage data to the JSON response
+    int roundedPercentage = static_cast<int>(ceil(percentage));
+  int roundedVoltage = static_cast<int>(ceil(getVoltage()));
+    responseDoc["voltage"] = roundedVoltage;
+    responseDoc["percentage"] = roundedPercentage;
+    responseDoc["systemType"] = systemType;
+    responseDoc["setPercentageForOff"] = setPercentageForOff;
+
+
+    // Serialize the JSON document to a string
+    String response;
+    serializeJson(responseDoc, response);
+
+    // Send the JSON response to the client
+    request->send(200, "application/json", response);
+});
+
+server.on("/setPercentageOff", HTTP_POST, [](AsyncWebServerRequest *request) {}, NULL, [](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
+    JsonDocument jsonDoc;
+    DeserializationError error = deserializeJson(jsonDoc, (const char*)data);
+    
+    if (error) {
+        request->send(400, "application/json", "{\"error\":\"Invalid JSON format\"}");
+        return;
+    }
+
+    int newPercentage = jsonDoc["percentage"].as<int>();
+    setPercentageForOff = newPercentage;
+    EEPROM.write(setPercentageOffAddress, newPercentage);
+    EEPROM.commit();
+
+    request->send(200, "application/json", "{\"status\":\"success\",\"message\":\"Percentage updated\"}");
+});
 server.on("/deleteDevice", HTTP_POST, [](AsyncWebServerRequest *request) {}, NULL, [](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
     JsonDocument jsonDoc;
     DeserializationError error = deserializeJson(jsonDoc, (const char*)data);
