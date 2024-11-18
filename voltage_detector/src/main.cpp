@@ -60,7 +60,7 @@ void setup() {
   // Setup WiFi AP
   WiFi.softAP("ESP32_Battery_Monitor");
   WiFi.softAPConfig(IPAddress(192, 168, 1, 1), IPAddress(192, 168, 1, 1), IPAddress(255, 255, 255, 0));
-Serial.println("IP Address: welcome to the server");
+Serial.println("IP Address: welcome to the server v");
 
   analogReadResolution(12);  // ESP32 ADC is 12-bit
 
@@ -168,7 +168,7 @@ void displayOnLCD(float voltage, float percentage) {
     lcd.setCursor(0, 0);
     lcd.print("Volt: ");
     lcd.print(roundedVoltage);
-    lcd.print("V");
+    lcd.print("V ");
     lcd.setCursor(9, 0);
     lcd.print("Sys:");
     lcd.print(systemType);
@@ -210,7 +210,7 @@ server.on("/setPercentageOffs", HTTP_POST, [](AsyncWebServerRequest *request) {}
         return;
     }
 
-    // ... rest of the function remains the same ...
+   
 
 
     
@@ -268,34 +268,46 @@ server.on("/getVoltageById", HTTP_GET, [](AsyncWebServerRequest *request) {
 
 
 server.on("/getvoltage", HTTP_GET, [](AsyncWebServerRequest *request) {
-    // Create a JSON document to store the response data
-    StaticJsonDocument<256> responseDoc;
+     JsonDocument responseDoc;  // Fixed size allocation
+    
+    Serial.print("here in get");
+    float rawVoltage =24.4;
+    if (rawVoltage < 0) {  // Assuming negative voltage indicates error
+        request->send(500, "application/json", "{\"error\":\"Failed to read voltage\"}");
+        return;
+    }
 
-    // Add the voltage and percentage data to the JSON response
+    
     int roundedPercentage = static_cast<int>(ceil(percentage));
-  int roundedVoltage = static_cast<int>(ceil(getVoltage()));
+    int roundedVoltage = static_cast<int>(ceil(rawVoltage));
+    
     responseDoc["voltage"] = roundedVoltage;
     responseDoc["percentage"] = roundedPercentage;
     responseDoc["systemType"] = systemType;
     responseDoc["setPercentageForOff"] = setPercentageForOff;
 
 
-    // Serialize the JSON document to a string
+
     String response;
     serializeJson(responseDoc, response);
+    
 
-    // Send the JSON response to the client
+    
     request->send(200, "application/json", response);
 });
 
-server.on("/setPercentageOff", HTTP_POST, [](AsyncWebServerRequest *request) {}, NULL, [](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
+server.on("/setdefaultoff", HTTP_POST, [](AsyncWebServerRequest *request) {}, NULL, [](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
     JsonDocument jsonDoc;
+     Serial.print("here in post"); 
     DeserializationError error = deserializeJson(jsonDoc, (const char*)data);
+
+
     
     if (error) {
         request->send(400, "application/json", "{\"error\":\"Invalid JSON format\"}");
         return;
     }
+
 
     int newPercentage = jsonDoc["percentage"].as<int>();
     setPercentageForOff = newPercentage;
